@@ -4,9 +4,10 @@ import Loader from './classes/Loader.js';
 import Renderer from './classes/Renderer.js';
 import Camera from './classes/Camera.js';
 
-import Quad from './classes/Quad.js';
+import Cube from './classes/Cube.js';
 import Texture from './classes/Texture.js';
 import Entity from './classes/Entity.js';
+import Light from './classes/Light.js';
 
 // ENGINE STUFF
 
@@ -52,24 +53,27 @@ const demo = function(res) {
 	const shader = new Shader(res.vsText, res.fsText);
 	const loader = new Loader();
 	const renderer = new Renderer(45, canvas.width / canvas.height, 0.1, 1000.0);
-	const camera = new Camera([0, 0, 0], [0, 0, 0], [0, 1, 0]);
+	const camera = new Camera([0, 0, -10], [0, 0, 0], [0, 1, 0]);
 
-	const mesh = loader.loadMesh(Quad.positions, Quad.texCoords, Quad.colors, Quad.indices);
+	const mesh = loader.loadMesh(Cube.positions, Cube.texCoords, Cube.normals, Cube.indices);
 	const texture = new Texture(res.crate);
 	const entities = [];
+	const light = new Light(camera.position, [1, 1, 1]);
 
-	for (let i = 0; i < 20; i++) {
+	for (let i = 0; i < 15; i++) {
 		entities.push(new Entity(
-			[randf(-10, 10), 0, randf(-10, 10)],
-			[0, randf(0, Math.PI * 2), 0],
+			[randf(-20, 20), 0, randf(-20, 20)],
+			[0, randi(0, 180), 0],
 			[1, 1, 1]
 		));
 	}
 
 	function loop() {
+		light.position = camera.position;
 		shader.bind();
 		shader.setProj(renderer.getProj());
 		shader.setView(camera.getView());
+		shader.setLight(light);
 		renderer.renderClear();
 		renderer.renderEntities(shader, mesh, texture, entities);
 		shader.unbind();
@@ -101,7 +105,7 @@ const loadImageFromFile = function(path) {
 	});
 }
 
-// MAIN METHOD
+// INPUT METHODS
 
 window.onload = init;
 window.onkeydown = ({keyCode}) => keys[keyCode] = true;

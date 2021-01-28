@@ -7,13 +7,17 @@ export default class Shader {
 		this.program = this.createProgram();
 		this.vs = this.createShader(gl.VERTEX_SHADER, vsText);
 		this.fs = this.createShader(gl.FRAGMENT_SHADER, fsText);
-
 		this.linkProgram(this.program, this.vs, this.fs);
 		this.validateProgram(this.program);
+
+		// UNIFORMS
 
 		this.modelLocation = gl.getUniformLocation(this.program, 'model');
 		this.viewLocation = gl.getUniformLocation(this.program, 'view');
 		this.projLocation = gl.getUniformLocation(this.program, 'proj');
+
+		this.lightPositionLocation = gl.getUniformLocation(this.program, 'lightPosition');
+		this.lightColorLocation = gl.getUniformLocation(this.program, 'lightColor');
 	}
 
 	createProgram() {
@@ -76,10 +80,18 @@ export default class Shader {
 		gl.uniformMatrix4fv(this.projLocation, gl.FALSE, value);
 	}
 	
-	// OTHER SETTER METHODS
-	
-	setVec3(name, value) {
-		const location = gl.getUniformLocation(this.program, name);
-		gl.uniform3f(location, value);
+	// LIGHTING METHODS
+
+	setLight(light) {
+		gl.uniform3f(
+			this.lightPositionLocation,
+			light.position[0],
+			light.position[1],
+			light.position[2]);
+		gl.uniform3f(
+			this.lightColorLocation,
+			light.color[0],
+			light.color[1],
+			light.color[2]);
 	}
 }

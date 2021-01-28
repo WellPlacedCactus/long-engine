@@ -1,19 +1,24 @@
 precision mediump float;
 
-attribute vec2 v_position;
+attribute vec3 v_position;
 attribute vec2 v_texCoord;
-attribute vec3 v_color;
+attribute vec3 v_normal;
 
 varying vec2 f_texCoord;
-varying vec3 f_color;
+varying vec3 f_normal;
+varying vec3 f_toLight;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+uniform vec3 lightPosition;
+
 void main()
 {
-	gl_Position = proj * view * model * vec4(v_position, 0.0, 1.0);
+	vec4 worldPosition = model * vec4(v_position, 1.0);
 	f_texCoord = v_texCoord;
-	f_color = v_color;
+	f_normal = (model * vec4(v_normal, 0.0)).xyz;
+	f_toLight = lightPosition - worldPosition.xyz;
+	gl_Position = proj * view * worldPosition;
 }

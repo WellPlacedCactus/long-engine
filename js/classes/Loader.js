@@ -6,10 +6,10 @@ export default class Loader {
 	
 	constructor() {}
 
-	loadMesh(positions, texCoords, colors, indices) {
-		this.loadAttribute(0, 2, positions);
+	loadMesh(positions, texCoords, normals, indices) {
+		this.loadAttribute(0, 3, positions);
 		this.loadAttribute(1, 2, texCoords);
-		this.loadAttribute(2, 3, colors);
+		this.loadAttribute(2, 3, normals);
 		this.loadIndices(indices);
 		return new Mesh(indices.length);
 	}
