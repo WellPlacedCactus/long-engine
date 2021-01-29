@@ -31,7 +31,6 @@ export default class Renderer {
 	}
 
 	renderClear() {
-		// gl.clearColor(0.75, 0.85, 0.8, 1.0);
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		gl.enable(gl.DEPTH_TEST);
@@ -40,12 +39,11 @@ export default class Renderer {
 		gl.cullFace(gl.BACK);
 	}
 
-	renderEntities(shader, mesh, texture, entities, camera) {
+	renderEntities(shader, mesh, texture, entities) {
 		texture.bind();
 		this.enableAttribs();
 		entities.forEach(e => {
 			shader.setModel(e.getModel());
-			shader.setLight(camera, e.color);
 			gl.drawElements(gl.TRIANGLES, mesh.vertexCount, gl.UNSIGNED_SHORT, 0);
 		});
 		this.disableAttribs();

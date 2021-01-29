@@ -11,10 +11,6 @@ export default class Camera {
 		this.view = new Float32Array(16);
 		this.angle = Math.PI / 2;
 		this.sens = 0.3;
-
-		canvas.onmousemove = e => {
-			this.angle += e.movementX * 0.002;
-		};
 	}
 
 	move(x, y, z) {
@@ -23,7 +19,9 @@ export default class Camera {
 		this.position[2] += z;
 	}
 
-	getView() {
+	input() {
+		// running
+		this.sens = (keys[16] || keys[17]) ? 1 : 0.3;
 
 		// movement
 		if (keys[87] || keys[38]) {
@@ -46,9 +44,12 @@ export default class Camera {
 		// rotation
 		if (keys[37]) this.angle -= 0.04;
 		if (keys[39]) this.angle += 0.04;
+	}
 
-		this.direction[0] = this.position[0] + Math.cos(this.angle); // x
-		this.direction[2] = this.position[2] + Math.sin(this.angle); // z
+	getView() {
+		this.direction[0] = this.position[0] + Math.cos(this.angle);
+		this.direction[1] = this.position[1];
+		this.direction[2] = this.position[2] + Math.sin(this.angle);
 
 		mat4.identity(this.view);
 		mat4.lookAt(this.view, this.position, this.direction, this.up);

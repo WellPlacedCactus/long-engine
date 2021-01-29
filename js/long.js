@@ -1,5 +1,5 @@
 
-import { loadTextFromFile, loadImageFromFile, randi } from './utils.js';
+import { loadTextFromFile, loadImageFromFile } from './utils.js';
 
 import Shader from './classes/Shader.js';
 import Loader from './classes/Loader.js';
@@ -23,15 +23,9 @@ export const hud = {};
 hud.pos = document.getElementById('pos');
 hud.rot = document.getElementById('rot');
 
-// INPUT ENGINE SETUP
-
-canvas.onmousedown = () => canvas.requestPointerLock();
-window.onkeydown = ({keyCode}) => keys[keyCode] = true;
-window.onkeyup = ({keyCode}) => keys[keyCode] = false;
-
 const init = async function() {
-	canvas.width = 640;
-	canvas.height = 480;
+	canvas.width = 640 * 1.5;
+	canvas.height = 480 * 1.5;
 	document.body.append(canvas);
 	gl.viewport(0, 0, canvas.width, canvas.height);
 	loadAssets();
@@ -57,15 +51,15 @@ const demo = function(res) {
 	const shader = new Shader(res.vsText, res.fsText);
 	const loader = new Loader();
 	const renderer = new Renderer(75, canvas.width / canvas.height, 0.1, 1000.0);
-	const camera = new Camera([25 * 2, 0, 25 * 2], [0, 0, 0], [0, 1, 0], canvas);
+	const camera = new Camera([30, 0, 30], [0, 0, 0], [0, 1, 0], canvas);
 
 	const mesh = loader.loadMesh(Cube.positions, Cube.texCoords, Cube.normals, Cube.indices);
 	const texture = new Texture(res.crate);
 	const entities = [];
-	const light = new Light(camera.position, [1, 1, 1]);
+	const light = new Light([0, 2, 0], [1, 1, 1]);
 
-	for (let z = 0; z < 50; z++) {
-		for (let x = 0; x < 50; x++) {
+	for (let z = 0; z < 25; z++) {
+		for (let x = 0; x < 25; x++) {
 			if (Math.random() < 0.2) {
 				entities.push(new Entity(
 					[x * 4, 0, z * 4],
@@ -83,13 +77,14 @@ const demo = function(res) {
 
 	function loop() {
 		light.position = camera.position;
+		camera.input();
 		updateHUD();
 		shader.bind();
 		shader.setProj(renderer.getProj());
 		shader.setView(camera.getView());
-		// shader.setLight(light);
+		shader.setLight(light);
 		renderer.renderClear();
-		renderer.renderEntities(shader, mesh, texture, entities, camera);
+		renderer.renderEntities(shader, mesh, texture, entities);
 		shader.unbind();
 		requestAnimationFrame(loop);
 	}
@@ -97,6 +92,8 @@ const demo = function(res) {
 	loop();
 }
 
-// MAIN METHOD
+// INPUT ENGINE SETUP
 
 window.onload = init;
+window.onkeydown = ({keyCode}) => keys[keyCode] = true;
+window.onkeyup = ({keyCode}) => keys[keyCode] = false;
