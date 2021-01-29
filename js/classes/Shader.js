@@ -16,7 +16,10 @@ export default class Shader {
 		this.viewLocation = gl.getUniformLocation(this.program, 'view');
 		this.projLocation = gl.getUniformLocation(this.program, 'proj');
 
-		this.lightPositionLocation = gl.getUniformLocation(this.program, 'lightPosition');
+		// LIGHTING
+
+		this.lightPositionLocation = gl.getUniformLocation(this.program, 'lightPos');
+		this.cameraPositionLocation = gl.getUniformLocation(this.program, 'cameraPos');
 		this.lightColorLocation = gl.getUniformLocation(this.program, 'lightColor');
 	}
 
@@ -30,7 +33,7 @@ export default class Shader {
 		gl.shaderSource(shader, source);
 		gl.compileShader(shader);
 		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-			console.error('Error vompiling shader!');
+			console.error('Error compiling shader!');
 			console.error(gl.getShaderInfoLog(shader));
 			return null;
 		} else {
@@ -82,16 +85,47 @@ export default class Shader {
 	
 	// LIGHTING METHODS
 
-	setLight(light) {
+	setLightConstants(lightPosition, cameraPosition, lightColor, material) {
 		gl.uniform3f(
 			this.lightPositionLocation,
-			light.position[0],
-			light.position[1],
-			light.position[2]);
+			lightPosition[0],
+			lightPosition[1],
+			lightPosition[2]
+		);
+		gl.uniform3f(
+			this.cameraPositionLocation,
+			cameraPosition[0],
+			cameraPosition[1],
+			cameraPosition[2]
+		);
 		gl.uniform3f(
 			this.lightColorLocation,
-			light.color[0],
-			light.color[1],
-			light.color[2]);
+			lightColor[0],
+			lightColor[1],
+			lightColor[2]
+		);
+
+		gl.uniform3f(
+			gl.getUniformLocation(this.program, 'material.ambient'),
+			material.ambient[0],
+			material.ambient[1],
+			material.ambient[2],
+		);
+		gl.uniform3f(
+			gl.getUniformLocation(this.program, 'material.diffuse'),
+			material.diffuse[0],
+			material.diffuse[1],
+			material.diffuse[2],
+		);
+		gl.uniform3f(
+			gl.getUniformLocation(this.program, 'material.specular'),
+			material.specular[0],
+			material.specular[1],
+			material.specular[2],
+		);
+		gl.uniform1f(
+			gl.getUniformLocation(this.program, 'material.shininess'),
+			material.shininess
+		);
 	}
 }

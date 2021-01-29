@@ -1,5 +1,5 @@
 
-import { loadTextFromFile, loadImageFromFile } from './utils.js';
+import { loadTextFromFile, loadImageFromFile, randi } from './utils.js';
 
 import Shader from './classes/Shader.js';
 import Loader from './classes/Loader.js';
@@ -7,9 +7,8 @@ import Renderer from './classes/Renderer.js';
 import Camera from './classes/Camera.js';
 
 import Cube from './classes/Cube.js';
-import Texture from './classes/Texture.js';
+import Material from './classes/Material.js';
 import Entity from './classes/Entity.js';
-import Light from './classes/Light.js';
 
 // QUANG TRONG ENGINE CONSTANTS
 
@@ -51,21 +50,33 @@ const demo = function(res) {
 	const shader = new Shader(res.vsText, res.fsText);
 	const loader = new Loader();
 	const renderer = new Renderer(75, canvas.width / canvas.height, 0.1, 1000.0);
-	const camera = new Camera([30, 0, 30], [0, 0, 0], [0, 1, 0], canvas);
+	const camera = new Camera([25, 0, 25], [0, 0, 0], [0, 1, 0], canvas);
 
-	const mesh = loader.loadMesh(Cube.positions, Cube.texCoords, Cube.normals, Cube.indices);
-	const texture = new Texture(res.crate);
+	const mesh = loader.loadMesh(Cube.positions, Cube.normals, Cube.indices);
+	const material = new Material(
+		[0.24725, 0.1995, 0.0745],
+		[0.75164, 0.60648, 0.22648],
+		[0.628281, 0.555802, 0.366065],
+		0.4
+	);
 	const entities = [];
-	const light = new Light([0, 2, 0], [1, 1, 1]);
+
+	entities.push(new Entity(
+		[25 * 2, -2, 25 * 2],
+		[0, 0, 0],
+		[25 * 2, 1, 25 * 2]
+	));
 
 	for (let z = 0; z < 25; z++) {
 		for (let x = 0; x < 25; x++) {
 			if (Math.random() < 0.2) {
-				entities.push(new Entity(
-					[x * 4, 0, z * 4],
-					[0, 0, 0],
-					[1, 1, 1]
-				));
+				for (let i = 0; i < randi(2, 10); i++) {
+					entities.push(new Entity(
+						[x * 4, i * 2, z * 4],
+						[0, 0, 0],
+						[1, 1, 1]
+					));
+				}
 			}
 		}
 	}
@@ -76,15 +87,19 @@ const demo = function(res) {
 	}
 
 	function loop() {
-		light.position = camera.position;
 		camera.input();
 		updateHUD();
 		shader.bind();
 		shader.setProj(renderer.getProj());
 		shader.setView(camera.getView());
-		shader.setLight(light);
+		shader.setLightConstants(
+			camera.position,
+			camera.position,
+			[1, 1, 1],
+			material
+		);
 		renderer.renderClear();
-		renderer.renderEntities(shader, mesh, texture, entities);
+		renderer.renderEntities(shader, mesh, entities);
 		shader.unbind();
 		requestAnimationFrame(loop);
 	}

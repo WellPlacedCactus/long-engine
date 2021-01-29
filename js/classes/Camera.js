@@ -1,5 +1,5 @@
 
-import { canvas, mat4, keys, hud } from '../long.js';
+import { mat4, keys } from '../long.js';
 
 export default class Camera {
 
@@ -9,43 +9,31 @@ export default class Camera {
 		this.up = up;
 		
 		this.view = new Float32Array(16);
-		this.angle = Math.PI / 2;
+		this.angle = Math.PI / 2 + Math.PI;
 		this.sens = 0.3;
 	}
 
-	move(x, y, z) {
-		this.position[0] += x;
-		this.position[1] += y;
-		this.position[2] += z;
+	move(rad) {
+		this.position[0] += Math.cos(rad) * this.sens; // x
+		this.position[2] += Math.sin(rad) * this.sens; // z
 	}
+
 
 	input() {
 		// running
 		this.sens = (keys[16] || keys[17]) ? 1 : 0.3;
 
 		// movement
-		if (keys[87] || keys[38]) {
-			this.position[0] += Math.cos(this.angle) * this.sens; // x
-			this.position[2] += Math.sin(this.angle) * this.sens; // z
-		}
-		if (keys[83] || keys[40]) {
-			this.position[0] -= Math.cos(this.angle) * this.sens; // x
-			this.position[2] -= Math.sin(this.angle) * this.sens; // z
-		}
-		if (keys[65]) {
-			this.position[0] += Math.cos(this.angle - Math.PI / 2) * this.sens; // x
-			this.position[2] += Math.sin(this.angle - Math.PI / 2) * this.sens; // z
-		}
-		if (keys[68]) {
-			this.position[0] += Math.cos(this.angle + Math.PI / 2) * this.sens; // x
-			this.position[2] += Math.sin(this.angle + Math.PI / 2) * this.sens; // z
-		}
+		if (keys[87] || keys[38]) this.move(this.angle);
+		if (keys[83] || keys[40]) this.move(this.angle + Math.PI);
+		if (keys[65]) this.move(this.angle - Math.PI / 2);
+		if (keys[68]) this.move(this.angle + Math.PI / 2);
 
 		// rotation
 		if (keys[37]) this.angle -= 0.04;
 		if (keys[39]) this.angle += 0.04;
 	}
-
+	
 	getView() {
 		this.direction[0] = this.position[0] + Math.cos(this.angle);
 		this.direction[1] = this.position[1];
