@@ -82,16 +82,26 @@ export default class Shader {
 	
 	// LIGHTING METHODS
 
-	setLight(light) {
+	setLight(camera, color) {
+		// gl.uniform3f(
+		// 	this.lightPositionLocation,
+		// 	light.position[0],
+		// 	light.position[1],
+		// 	light.position[2]);
+		// gl.uniform3f(
+		// 	this.lightColorLocation,
+		// 	light.color[0],
+		// 	light.color[1],
+		// 	light.color[2]);
 		gl.uniform3f(
 			this.lightPositionLocation,
-			light.position[0],
-			light.position[1],
-			light.position[2]);
+			camera.position[0],
+			camera.position[1],
+			camera.position[2]);
 		gl.uniform3f(
 			this.lightColorLocation,
-			light.color[0],
-			light.color[1],
-			light.color[2]);
+			color[0],
+			color[1],
+			color[2]);
 	}
 }

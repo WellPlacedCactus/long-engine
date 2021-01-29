@@ -1,4 +1,6 @@
 
+import { loadTextFromFile, loadImageFromFile, randi } from './utils.js';
+
 import Shader from './classes/Shader.js';
 import Loader from './classes/Loader.js';
 import Renderer from './classes/Renderer.js';
@@ -9,23 +11,23 @@ import Texture from './classes/Texture.js';
 import Entity from './classes/Entity.js';
 import Light from './classes/Light.js';
 
-// ENGINE STUFF
+// QUANG TRONG ENGINE CONSTANTS
 
 export const canvas = document.createElement('canvas');
 export const gl = canvas.getContext('webgl');
 export const mat4 = glMatrix.mat4;
 export const keys = [];
 
-// UTIL FUNCTIONS
-
-export const randi = (min, max) => Math.floor(Math.random() * (max - min) + min);
-export const randf = (min, max) => Math.random() * (max - min) + min;
-export const rands = () => Math.random() > 0.5 ? 1 : -1;
-
-// HUD ELEMENTS
+// HUD ENGINE CONSTANTS
 export const hud = {};
 hud.pos = document.getElementById('pos');
 hud.rot = document.getElementById('rot');
+
+// INPUT ENGINE SETUP
+
+canvas.onmousedown = () => canvas.requestPointerLock();
+window.onkeydown = ({keyCode}) => keys[keyCode] = true;
+window.onkeyup = ({keyCode}) => keys[keyCode] = false;
 
 const init = async function() {
 	canvas.width = 640;
@@ -34,6 +36,8 @@ const init = async function() {
 	gl.viewport(0, 0, canvas.width, canvas.height);
 	loadAssets();
 }
+
+// ACTUAL ASSET LOADING
 
 const loadAssets = async function() {
 	const vsText = await loadTextFromFile('assets/shaders/vs.glsl');
@@ -52,30 +56,40 @@ const demo = function(res) {
 
 	const shader = new Shader(res.vsText, res.fsText);
 	const loader = new Loader();
-	const renderer = new Renderer(45, canvas.width / canvas.height, 0.1, 1000.0);
-	const camera = new Camera([0, 0, -10], [0, 0, 0], [0, 1, 0]);
+	const renderer = new Renderer(75, canvas.width / canvas.height, 0.1, 1000.0);
+	const camera = new Camera([25 * 2, 0, 25 * 2], [0, 0, 0], [0, 1, 0], canvas);
 
 	const mesh = loader.loadMesh(Cube.positions, Cube.texCoords, Cube.normals, Cube.indices);
 	const texture = new Texture(res.crate);
 	const entities = [];
 	const light = new Light(camera.position, [1, 1, 1]);
 
-	for (let i = 0; i < 15; i++) {
-		entities.push(new Entity(
-			[randf(-20, 20), 0, randf(-20, 20)],
-			[0, randi(0, 180), 0],
-			[1, 1, 1]
-		));
+	for (let z = 0; z < 50; z++) {
+		for (let x = 0; x < 50; x++) {
+			if (Math.random() < 0.2) {
+				entities.push(new Entity(
+					[x * 4, 0, z * 4],
+					[0, 0, 0],
+					[1, 1, 1]
+				));
+			}
+		}
+	}
+
+	function updateHUD() {
+		hud.pos.innerHTML = `x: ${Math.round(camera.position[0])}, z: ${Math.round(camera.position[2])}`;
+		hud.rot.innerHTML = Math.round(camera.angle * 180 / Math.PI);
 	}
 
 	function loop() {
 		light.position = camera.position;
+		updateHUD();
 		shader.bind();
 		shader.setProj(renderer.getProj());
 		shader.setView(camera.getView());
-		shader.setLight(light);
+		// shader.setLight(light);
 		renderer.renderClear();
-		renderer.renderEntities(shader, mesh, texture, entities);
+		renderer.renderEntities(shader, mesh, texture, entities, camera);
 		shader.unbind();
 		requestAnimationFrame(loop);
 	}
@@ -83,30 +97,6 @@ const demo = function(res) {
 	loop();
 }
 
-// ASSET LOADING
-
-const loadTextFromFile = function(path) {
-	return new Promise(resolve => {
-		fetch(path)
-		.then(res => res.text())
-		.then(text => {
-			resolve(text);
-		});
-	});
-}
-
-const loadImageFromFile = function(path) {
-	return new Promise(resolve => {
-		const image = new Image();
-		image.onload = function() {
-			resolve(image);
-		}
-		image.src = path;
-	});
-}
-
-// INPUT METHODS
+// MAIN METHOD
 
 window.onload = init;
-window.onkeydown = ({keyCode}) => keys[keyCode] = true;
-window.onkeyup = ({keyCode}) => keys[keyCode] = false;

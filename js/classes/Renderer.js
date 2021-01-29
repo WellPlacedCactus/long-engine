@@ -1,5 +1,6 @@
 
 import { gl, mat4 } from '../long.js';
+import Light from './Light.js';
 
 export default class Renderer {
 
@@ -39,11 +40,12 @@ export default class Renderer {
 		gl.cullFace(gl.BACK);
 	}
 
-	renderEntities(shader, mesh, texture, entities) {
+	renderEntities(shader, mesh, texture, entities, camera) {
 		texture.bind();
 		this.enableAttribs();
 		entities.forEach(e => {
 			shader.setModel(e.getModel());
+			shader.setLight(camera, e.color);
 			gl.drawElements(gl.TRIANGLES, mesh.vertexCount, gl.UNSIGNED_SHORT, 0);
 		});
 		this.disableAttribs();

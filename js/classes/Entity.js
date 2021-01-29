@@ -8,6 +8,10 @@ export default class Entity {
 		this.rotation = rotation;
 		this.scale = scale;
 		this.model = new Float32Array(16);
+		this.rotX = Math.random() < 0.5 ? 1 : -1;
+		this.rotY = Math.random() < 0.5 ? 1 : -1;
+		this.color = [1, 1, 1];
+		this.x = 0;
 	}
 
 	move(x, y, z) {
@@ -23,6 +27,11 @@ export default class Entity {
 	}
 
 	getModel() {
+		this.rotate(this.rotX, this.rotY, 0);
+		this.x += Math.random() * 0.1;
+		this.color[1] = (Math.sin(this.x) + 1) / 2;
+		this.color[2] = (Math.cos(this.x) + 1) / 2;
+
 		// matrices
 		let identity = mat4.create();
 		let positionMatrix = mat4.create();
